@@ -4,9 +4,9 @@
 #
 #################################################################
 
-using Base.Test
+using Test
+using ReverseDiffSource
 
-reload("ReverseDiffSource") # instead of 'using' to retest without exiting Julia
 m = ReverseDiffSource
 
 ## removes linenumbers from expression to ease comparisons

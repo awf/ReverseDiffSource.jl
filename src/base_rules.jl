@@ -4,9 +4,12 @@
 #
 #########################################################################
 
+using LinearAlgebra
+using SpecialFunctions
+
 # derivation neutral functions
-@deriv_rule colon(x,y)   x     0.
-@deriv_rule colon(x,y)   y     0.
+@deriv_rule (x:y)   x     0.
+@deriv_rule (x:y)   y     0.
 
 @deriv_rule length(x)    x     0.
 
@@ -24,7 +27,7 @@
 
 @deriv_rule ones(x)      x     0.
 
-@deriv_rule cell(x)      x     0.
+#@deriv_rule cell(x)      x     0.
 
 @deriv_rule sign(x)      x     0.
 

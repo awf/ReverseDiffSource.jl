@@ -20,21 +20,21 @@ end
 ## 0. where derivation makes no sense
 zeronode(t::Type{Symbol}) = tograph( :(0.) )
 zeronode(t::Type{DataType}) = tograph( :(0.) )
-zeronode(t::Type{TypeConstructor}) = tograph( :(0.) )
+#zeronode(t::Type{TypeConstructor}) = tograph( :(0.) )
 zeronode(t::Type{Type}) = tograph( :(0.) )
 zeronode(t::Type{Function}) = tograph( :(0.) )
 zeronode(t::Type{Module}) = tograph( :(0.) )
 
 # 0. for scalars
-zeronode{T<:Real}(t::Type{T})    = tograph( :(0.) )
+zeronode(t::Type{T}) where {T<:Real}    = tograph( :(0.) )
 
 # [0.,0.] for ranges and Complex
-zeronode{T<:Complex}(t::Type{T}) = tograph( :( zeros(2) ) )
-zeronode{T<:Range}(t::Type{T}) = tograph( :( zeros(2) ) )
+zeronode(t::Type{T}) where {T<:Complex} = tograph( :( zeros(2) ) )
+zeronode(t::Type{T}) where {T<:AbstractRange} = tograph( :( zeros(2) ) )
 
 # Float64 arrays for ..
-zeronode{T<:BitArray}(t::Type{T}) = tograph( :( zeros(size(tv)) ) )
-zeronode{T<:Real}(t::Type{Array{T}}) = tograph( :( zeros(size(tv)) ) )
+zeronode(t::Type{T}) where {T<:BitArray} = tograph( :( zeros(size(tv)) ) )
+zeronode(t::Type{Array{T}}) where {T<:Real} = tograph( :( zeros(size(tv)) ) )
 
 
 function zeronode(v)

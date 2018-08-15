@@ -5,37 +5,36 @@
 #########################################################################
 
 ##########  Parameterized type to ease AST exploration  ############
-type ExH{H}
+struct ExH{H}
     head::Symbol
     args::Vector
-    typ::Any
 end
-toExH(ex::Expr) = ExH{ex.head}(ex.head, ex.args, ex.typ)
-toExpr(ex::ExH) = Expr(ex.head, ex.args...)
+toExH(ex::Expr) = ExH{ex.head}(ex.head, ex.args)
+toExpr(ex::ExH{H}) where H = Expr(ex.head, ex.args...)
 
-typealias ExEqual    ExH{:(=)}
-typealias ExDColon   ExH{:(::)}
-typealias ExColon    ExH{:(:)}
-typealias ExPEqual   ExH{:(+=)}
-typealias ExMEqual   ExH{:(-=)}
-typealias ExTEqual   ExH{:(*=)}
-typealias ExTrans    ExH{Symbol("'")}
-typealias ExCall     ExH{:call}
-typealias ExBlock    ExH{:block}
-typealias ExLine     ExH{:line}
-typealias ExVcat     ExH{:vcat}
-typealias ExVect     ExH{:vect}
-typealias ExCell1d   ExH{:cell1d}
-typealias ExCell     ExH{:cell1d}
-typealias ExFor      ExH{:for}
-typealias ExRef      ExH{:ref}
-typealias ExIf       ExH{:if}
-typealias ExComp     ExH{:comparison}
-typealias ExDot      ExH{:.}
-typealias ExTuple    ExH{:tuple}
-typealias ExReturn   ExH{:return}
-typealias ExBody     ExH{:body}
-typealias ExQuote    ExH{:QuoteNode}
+const ExEqual =    ExH{:(=)}
+const ExDColon =   ExH{:(::)}
+const ExColon =    ExH{:(:)}
+const ExPEqual =   ExH{:(+=)}
+const ExMEqual =   ExH{:(-=)}
+const ExTEqual =   ExH{:(*=)}
+const ExTrans =    ExH{Symbol("'")}
+const ExCall =     ExH{:call}
+const ExBlock =    ExH{:block}
+const ExLine =     ExH{:line}
+const ExVcat =     ExH{:vcat}
+const ExVect =     ExH{:vect}
+const ExCell1d =   ExH{:cell1d}
+const ExCell =     ExH{:cell1d}
+const ExFor =      ExH{:for}
+const ExRef =      ExH{:ref}
+const ExIf =       ExH{:if}
+const ExComp =     ExH{:comparison}
+const ExDot =      ExH{:.}
+const ExTuple =    ExH{:tuple}
+const ExReturn =   ExH{:return}
+const ExBody =     ExH{:body}
+const ExQuote =    ExH{:QuoteNode}
 
 
 #  s     : expression to convert
@@ -48,8 +47,8 @@ function tograph(s, evalmod=Main, svars=Any[])
 
     explore(ex::ExLine)         = nothing     # remove line info
     explore(ex::LineNumberNode) = nothing     # remove line info
-    explore(ex::LabelNode)      = nothing     # remove label info
-    explore(ex::GotoNode)       = error("[tograph] GotoNode found") # this should be caught before in frdiff.jl
+    #explore(ex::LabelNode)      = nothing     # remove label info
+    #explore(ex::GotoNode)       = error("[tograph] GotoNode found") # this should be caught before in frdiff.jl
     explore(ex::QuoteNode)      = addnode!(g, NConst(ex.value))  # consider as constant
 
     explore(ex::ExReturn)  = explore(ex.args[1]) # focus on returned statement
@@ -58,7 +57,7 @@ function tograph(s, evalmod=Main, svars=Any[])
     explore(ex::ExVect)    = explore(Expr(:call, :vcat, ex.args...) )  # translate to vcat() call, and explore
     explore(ex::ExCell1d)  = explore(Expr(:call, :(Base.cell_1d), ex.args...) )  # translate to cell_1d() call, and explore
     explore(ex::ExTrans)   = explore(Expr(:call, :transpose, ex.args[1]) )  # translate to transpose() and explore
-    explore(ex::ExColon)   = explore(Expr(:call, :colon, ex.args...) )  # translate to colon() and explore
+    explore(ex::ExColon)   = explore(Expr(:call, :(:), ex.args...) )  # translate to colon() and explore
     explore(ex::ExTuple)   = explore(Expr(:call, :tuple, ex.args...) )  # translate to tuple() and explore
 
     explore(ex::ExPEqual)  = (args = ex.args ; explore( Expr(:(=), args[1], Expr(:call, :+, args[1], args[2])) ) )
@@ -274,7 +273,7 @@ function tograph(s, evalmod=Main, svars=Any[])
     for en in filter(n -> isa(n, NExt) & !in(n.main, svars) , keys(g.exti))
         if isdefined(evalmod, en.main)  # is it defined
             tv = evalmod.eval(en.main)
-            isa(tv, TypeConstructor) && error("[tograph] TypeConstructors not supported: $ex $(tv), use DataTypes")
+            #isa(tv, TypeConstructor) && error("[tograph] TypeConstructors not supported: $ex $(tv), use DataTypes")
             if isa(tv, DataType) || isa(tv, Module) || isa(tv, Function)
                 delete!(g.exti, en)
                 nc = addnode!(g, NConst( tv ))

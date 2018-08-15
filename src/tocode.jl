@@ -28,7 +28,7 @@ function tocode(g::ExGraph, evalmod::Module=Main)
         op = n.parents[1].main
         if op == vcat
             return Expr(      :vect, Any[ valueof(x,n) for x in n.parents[2:end] ]...)
-        elseif op == colon
+        elseif op == :(:)
             return Expr(       :(:), Any[ valueof(x,n) for x in n.parents[2:end] ]...)
         elseif op == transpose
             return Expr(Symbol("'"),                 valueof(n.parents[2], n) )
@@ -252,8 +252,8 @@ function relative_name(o::Union{Function,DataType}, emod::Module=Main)
                 Expr(:., mexpr(ns[1:end-1]), QuoteNode(ns[end]) )
 
   fs, mf = isa(o, Function) ?
-            (Base.function_name(o), Base.function_module(o)) :
-            (o.name.name          , Base.datatype_module(o))
+            (nameof(o),   parentmodule(o)) :
+            (o.name.name, Base.datatype_module(o))
 
   mfn = mf==Main ? (Main,) : fullname(mf)
 

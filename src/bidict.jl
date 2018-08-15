@@ -11,14 +11,13 @@
 import Base: setindex!, getindex, haskey, delete!,
   keys, values, start, next, done
 
-
-type BiDict{K,V}
+struct BiDict{K,V}
     kv::Dict{K,V}
     vk::Dict{V,K}
 
-    BiDict() = new(Dict{K,V}(), Dict{V,K}())
+    BiDict{K,V}() where {K,V} = new{K,V}(Dict{K,V}(), Dict{V,K}())
 
-    function BiDict(ks, vs)
+    function BiDict{K,V}(ks, vs) where {K,V}
         n = length(ks)
         length(unique(ks)) != n && error("Duplicate keys")
         length(unique(vs)) != n && error("Duplicate values")
@@ -30,7 +29,7 @@ type BiDict{K,V}
         return h
     end
 
-    function BiDict(d)
+    function BiDict{K,V}(d) where {K,V}
         n = length(d)
         vs = values(d)
         length(unique(vs)) != n && error("Duplicate values")
@@ -42,6 +41,10 @@ type BiDict{K,V}
         return h
     end
 end
+
+#BiDict{K,V}() where {K,V} = BiDict{K,V}()
+
+#const awfx = BiDict{String,Any}()
 
 # BiDict()                                                = BiDict{Any,Any}()
 # BiDict{K,V}(ks::AbstractArray{K}, vs::AbstractArray{V}) = BiDict{K,V}(ks,vs)
@@ -82,5 +85,7 @@ values(bd::BiDict)      = values(bd.kv)
 start(bd::BiDict)       = start(bd.kv)
 next(bd::BiDict, i)     = next(bd.kv, i)
 done(bd::BiDict, i)     = done(bd.kv, i)
+#iterate(bd::BiDict) = iterate(bd.kv)
+#iterate(bd::BiDict, s) = iterate(bd.kv, s)
 
 getindex(bd::BiDict, k) = bd.kv[k]

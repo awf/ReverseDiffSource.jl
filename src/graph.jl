@@ -4,16 +4,18 @@
 #
 #########################################################################
 
-typealias NSMap BiDict{ExNode, Any}   # ExNode - Symbol map
+const NSMap = BiDict{ExNode, Any}   # ExNode - Symbol map
 
 #####  ExGraph type definitions ######
-type ExGraph
+mutable struct ExGraph
   nodes::Vector{ExNode}  # nodes in this graph
   exti::NSMap
   seti::NSMap
   exto::NSMap
   seto::NSMap
 end
+
+const x = BiDict{ExNode, Any}()
 
 ExGraph()                   = ExGraph( ExNode[] )
 ExGraph(vn::Vector{ExNode}) = ExGraph( vn, NSMap(),

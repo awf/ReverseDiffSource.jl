@@ -19,21 +19,22 @@ end
 
 ### creates rule through a new method on function DerivRules.dr
 function _define(f, ts, ord, payload)
-  st = _tosigtuple(f, ts, ord)
+  global st = _tosigtuple(f, ts, ord)
 
   push!(DerivRules.ruledict, payload)
   rid = length(DerivRules.ruledict)
 
+  # AWFTODO given eval here anyway, tidy up 
   if length(ts) == 0
-    DerivRules.dr(::st[1], ::st[2]) =  Val{rid}()
+    @eval DerivRules.dr(::st[1], ::st[2]) =  Val{rid}()
   elseif length(ts) == 1
-    DerivRules.dr(::st[1], ::st[2],::st[3]) =  Val{rid}()
+    @eval DerivRules.dr(::st[1], ::st[2],::st[3]) =  Val{rid}()
   elseif length(ts) == 2
-    DerivRules.dr(::st[1], ::st[2],::st[3], ::st[4]) =  Val{rid}()
+    @eval DerivRules.dr(::st[1], ::st[2],::st[3], ::st[4]) =  Val{rid}()
   elseif length(ts) == 3
-    DerivRules.dr(::st[1], ::st[2],::st[3], ::st[4],::st[5]) =  Val{rid}()
+    @eval DerivRules.dr(::st[1], ::st[2],::st[3], ::st[4],::st[5]) =  Val{rid}()
   elseif length(ts) == 4
-    DerivRules.dr(::st[1], ::st[2],::st[3], ::st[4],::st[5], ::st[6]) =  Val{rid}()
+    @eval DerivRules.dr(::st[1], ::st[2],::st[3], ::st[4],::st[5], ::st[6]) =  Val{rid}()
   else
     error("[DerivRules.define] too many arguments !")
   end
@@ -60,7 +61,7 @@ end
 
 ### converts argument expressions to a vector of tuples (symbol, type)
 function _formatargs(fargs)
-  m = current_module()
+  m = @__MODULE__
   args = Tuple{Symbol, Type}[]
   for e in fargs
       if isa(e, Symbol)
@@ -85,7 +86,7 @@ function _deriv_rule(func::Union{Function, Type},
   (ord == 0) && error("[deriv_rule] cannot find $dv in function arguments")
 
   # payload = ( Snippet(diff, vcat(ss, :ds)), repl )
-  payload = ( tograph(diff, current_module()), vcat(ss, :ds) )
+  payload = ( tograph(diff, @__MODULE__), vcat(ss, :ds) )
 
   _define(func, ts, ord, payload)
   nothing
@@ -108,7 +109,7 @@ rule applies.
 the derivative accumulator of the function result.
 """
 macro deriv_rule(func::Expr, dv::Symbol, diff)
-  m = current_module()
+  m = @__MODULE__
   ff = m.eval(func.args[1])
   args = _formatargs(func.args[2:end])
   _deriv_rule(m.eval(func.args[1]), args, dv, diff)

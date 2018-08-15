@@ -49,7 +49,7 @@
     @test zerocode(Array{Float64,4})   == :(zeros(size(tv)); )
     @test zerocode(Vector{Real})       == :(zeros(size(tv)); )
 
-    type Abcd
+    struct Abcd
         a::Float64
         b::Int64
         c::Vector{Float64}
